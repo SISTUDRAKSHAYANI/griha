@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrihaSetu - From Plot to Perfect Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#d97706',
+                        earth: '#92400e',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-hover {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app"></div>
+
+    <script>
+        // State Management
+        const state = {
+            currentPage: 'auth',
+            user: null,
+            bookings: JSON.parse(localStorage.getItem('grihasetu_bookings') || '[]'),
+            companies: [
+                {
+                    id: 1,
+                    name: "BuildPro Constructions",
+                    city: "Bangalore",
+                    rating: 4.8,
+                    projects: 156,
+                    priceRange: "₹1500-2000/sqft",
+                    image: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&h=600&fit=crop",
+                    portfolio: [
+                        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=300&fit=crop",
+                        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&h=300&fit=crop",
+                        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&h=300&fit=crop"
+                    ],
+                    services: ["Full Construction", "Basic Construction", "Renovation"],
+                    certified: true,
+                    experience: "15 years"
+                },
+                {
+                    id: 2,
+                    name: "Elite Interiors",
+                    city: "Mumbai",
+                    rating: 4.6,
+                    projects: 89,
+                    priceRange: "₹800-1200/sqft",
+                    image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&h=600&fit=crop",
+                    portfolio: [
+                        "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400&h=300&fit=crop",
+                        "https://images.unsplash.com/photo-1616137466211-f939a420be84?w=400&h=300&fit=crop",
+                        "https://images.unsplash.com/photo-1615875221248-d8c1e61d0a55?w=400&h=300&fit=crop"
+                    ],
+                    services: ["Interior Design", "Modular Kitchen", "Furniture"],
+                    certified: true,
+                    experience: "10 years"
+                },
+                {
+                    id: 3,
+                    name: "Urban Renovators",
+                    city: "Delhi",
+                    rating: 4.7,
+                    projects: 124,
+                    priceRange: "₹1000-1500/sqft",
+                    image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop",
+                    portfolio: [
+                        "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop",
+                        "https://images.unsplash.com/photo-1556020685-ae41abfc9365?w=400&h=300&fit=crop",
+                        "https://images.unsplash.com/photo-1567016432779-094069958ea5?w=400&h=300&fit=crop"
+                    ],
+                    services: ["Renovation", "Remodeling", "Painting"],
+                    certified: true,
+                    experience: "12 years"
+                },
+                {
+                    id: 4,
+                    name: "Dream Homes Architects",
+                    city: "Hyderabad",
+                    rating: 4.9,
+                    projects: 203,
+                    priceRange: "₹1800-2500/sqft",
+                    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop",
+                    portfolio: [
+                        "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=300&fit=crop",
+                        "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=400&h=300&fit=crop",
+                        "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=400&h=300&fit=crop"
+                    ],
+                    services: ["Architecture", "Full Construction", "Luxury Homes"],
+                    certified: true,
+                    experience: "20 years"
+                },
+                {
+                    id: 5,
+                    name: "Craftsmen Builders",
+                    city: "Pune",
+                    rating: 4.5,
+                    projects: 67,
+                    priceRange: "₹1200-1600/sqft",
+                    image: "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&h=600&fit=crop",
+                    portfolio: [
+                        "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=400&h=300&fit=crop",
+                        "https://images.unsplash.com/photo-1598228723793-52759bba239c?w=400&h=300&fit=crop",
+                        "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=400&h=300&fit=crop"
+                    ],
+                    services: ["Basic Construction", "Renovation", "Commercial"],
+                    certified: true,
+                    experience: "8 years"
+                },
+                {
+                    id: 6,
+                    name: "Signature Painters",
+                    city: "Bangalore",
+                    rating: 4.4,
+                    projects: 342,
+                    priceRange: "₹25-45/sqft",
+                    image: "https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=800&h=600&fit=crop",
+                    portfolio: [
+                        "https://images.unsplash.com/photo-1615873968403-89e068629265?w=400&h=300&fit=crop",
+                        "https://images.unsplash.com/photo-1609767500458-d2a133f61cab?w=400&h=300&fit=crop",
+                        "https://images.unsplash.com/photo-1621277224630-81a7e6df2390?w=400&h=300&fit=crop"
+                    ],
+                    services: ["Painting", "Texture", "Waterproofing"],
+                    certified: true,
+                    experience: "6 years"
+                }
+            ],
+            bookingForm: {},
+            currentBookingType: null,
+            selectedCompany: null,
+            filteredCompanies: []
+        };
+
+        // Auth Page
+        function AuthPage() {
+            return `
+                <div class="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50 flex items-center justify-center p-4">
+                    <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 fade-in">
+                        <div class="text-center mb-8">
+                            <h1 class="text-4xl font-bold text-primary mb-2">GrihaSetu</h1>
+                            <p class="text-gray-600 text-sm">From Plot to Perfect Home</p>
+                        </div>
+                        
+                        <div id="auth-form">
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email / Mobile</label>
+                                <input type="text" id="auth-email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter email or mobile">
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <input type="password" id="auth-password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter password">
+                            </div>
+                            
+                            <button onclick="handleLogin()" class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition mb-4">
+                                Login
+                            </button>
+                            
+                            <button onclick="handleRegister()" class="w-full border-2 border-primary text-primary py-3 rounded-lg font-semibold hover:bg-blue-50 transition">
+                                Register New Account
+                            </button>
+                            
+                            <div class="mt-4 text-center">
+                                <a href="#" class="text-sm text-gray-600 hover:text-primary">Forgot Password?</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Navigation Bar
+        function NavBar() {
+            return `
+                <nav class="bg-white shadow-md sticky top-0 z-50">
+                    <div class="max-w-7xl mx-auto px-4">
+                        <div class="flex justify-between items-center h-16">
+                            <div class="flex items-center space-x-8">
+                                <h1 class="text-2xl font-bold text-primary">GrihaSetu</h1>
+                                <div class="hidden md:flex space-x-6">
+                                    <button onclick="navigateTo('home')" class="nav-link ${state.currentPage === 'home' ? 'text-primary font-semibold' : 'text-gray-600 hover:text-primary'}">Home</button>
+                                    <button onclick="navigateTo('explore')" class="nav-link ${state.currentPage === 'explore' ? 'text-primary font-semibold' : 'text-gray-600 hover:text-primary'}">Explore</button>
+                                    <button onclick="navigateTo('about')" class="nav-link ${state.currentPage === 'about' ? 'text-primary font-semibold' : 'text-gray-600 hover:text-primary'}">About Us</button>
+                                    <button onclick="navigateTo('profile')" class="nav-link ${state.currentPage === 'profile' ? 'text-primary font-semibold' : 'text-gray-600 hover:text-primary'}">Profile</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-sm text-gray-600">Welcome, ${state.user?.name || 'User'}</span>
+                                <button onclick="handleLogout()" class="text-sm text-red-600 hover:text-red-700">Logout</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile Menu -->
+                    <div class="md:hidden px-4 pb-4 space-y-2">
+                        <button onclick="navigateTo('home')" class="block w-full text-left py-2 ${state.currentPage === 'home' ? 'text-primary font-semibold' : 'text-gray-600'}">Home</button>
+                        <button onclick="navigateTo('explore')" class="block w-full text-left py-2 ${state.currentPage === 'explore' ? 'text-primary font-semibold' : 'text-gray-600'}">Explore</button>
+                        <button onclick="navigateTo('about')" class="block w-full text-left py-2 ${state.currentPage === 'about' ? 'text-primary font-semibold' : 'text-gray-600'}">About Us</button>
+                        <button onclick="navigateTo('profile')" class="block w-full text-left py-2 ${state.currentPage === 'profile' ? 'text-primary font-semibold' : 'text-gray-600'}">Profile</button>
+                    </div>
+                </nav>
+            `;
+        }
+
+        // Home Page
+        function HomePage() {
+            const services = [
+                { name: 'Full Construction Package', icon: '🏗️', color: 'bg-blue-100', type: 'full' },
+                { name: 'Basic Construction', icon: '🏘️', color: 'bg-green-100', type: 'basic' },
+                { name: 'Interior Design', icon: '🛋️', color: 'bg-purple-100', type: 'interior' },
+                { name: 'Paintings', icon: '🎨', color: 'bg-yellow-100', type: 'painting' },
+                { name: 'Renovations', icon: '🔨', color: 'bg-red-100', type: 'renovation' },
+                { name: 'Cost Estimation', icon: '💰', color: 'bg-orange-100', type: 'estimation' }
+            ];
+
+            return `
+                ${NavBar()}
+                <div class="max-w-7xl mx-auto px-4 py-8 fade-in">
+                    <!-- Hero Section -->
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-8 md:p-12 text-white mb-8">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-4">Build Your Dream Home</h2>
+                        <p class="text-lg mb-6 opacity-90">Connect with expert construction teams, architects, and designers</p>
+                        <button onclick="navigateTo('explore')" class="bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                            Explore Services →
+                        </button>
+                    </div>
+
+                    <!-- Services Grid -->
+                    <h3 class="text-2xl font-bold mb-6">Our Services</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                        ${services.map(service => `
+                            <div class="bg-white rounded-xl shadow-md p-6 card-hover cursor-pointer" onclick="startBooking('${service.type}')">
+                                <div class="${service.color} w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4">
+                                    ${service.icon}
+                                </div>
+                                <h4 class="text-xl font-semibold mb-2">${service.name}</h4>
+                                <p class="text-gray-600 text-sm mb-4">Professional ${service.name.toLowerCase()} services</p>
+                                <button class="text-primary font-semibold hover:underline">Book Now →</button>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- Previously Designed Houses Gallery -->
+                    <h3 class="text-2xl font-bold mb-6">Featured Projects</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        ${[
+                            { img: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop', title: 'Modern Villa', loc: 'Bangalore, Karnataka', type: 'Luxury Construction' },
+                            { img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=600&fit=crop', title: 'Contemporary Home', loc: 'Mumbai, Maharashtra', type: 'Premium Interior' },
+                            { img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop', title: 'Minimalist Design', loc: 'Hyderabad, Telangana', type: 'Full Construction' },
+                            { img: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&h=600&fit=crop', title: 'Urban Residence', loc: 'Delhi, NCR', type: 'Renovation Project' },
+                            { img: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&h=600&fit=crop', title: 'Elegant Living', loc: 'Pune, Maharashtra', type: 'Interior Design' },
+                            { img: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&h=600&fit=crop', title: 'Family Home', loc: 'Chennai, Tamil Nadu', type: 'Basic Construction' }
+                        ].map(project => `
+                            <div class="rounded-xl overflow-hidden shadow-lg card-hover cursor-pointer" onclick="openImageModal('${project.img}')">
+                                <img src="${project.img}" alt="${project.title}" class="w-full h-64 object-cover">
+                                <div class="p-4 bg-white">
+                                    <p class="font-semibold text-lg">${project.title}</p>
+                                    <p class="text-sm text-gray-600 mb-1">📍 ${project.loc}</p>
+                                    <span class="inline-block bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">${project.type}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <!-- Image Modal -->
+                    <div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4" onclick="closeImageModal()">
+                        <img id="modalImage" src="" class="max-w-full max-h-full rounded-lg">
+                        <button class="absolute top-4 right-4 text-white text-4xl hover:text-gray-300">&times;</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Explore Page
+        function ExplorePage() {
+            const displayCompanies = state.filteredCompanies.length > 0 ? state.filteredCompanies : state.companies;
+            
+            return `
+                ${NavBar()}
+                <div class="max-w-7xl mx-auto px-4 py-8 fade-in">
+                    <h2 class="text-3xl font-bold mb-6">Explore Professionals</h2>
+                    
+                    <!-- Filters -->
+                    <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <input type="text" id="searchInput" placeholder="Search companies..." class="px-4 py-2 border rounded-lg" onkeyup="filterCompanies()">
+                            <select id="cityFilter" class="px-4 py-2 border rounded-lg" onchange="filterCompanies()">
+                                <option value="">All Cities</option>
+                                <option>Bangalore</option>
+                                <option>Mumbai</option>
+                                <option>Delhi</option>
+                                <option>Hyderabad</option>
+                                <option>Pune</option>
+                            </select>
+                            <select id="serviceFilter" class="px-4 py-2 border rounded-lg" onchange="filterCompanies()">
+                                <option value="">All Services</option>
+                                <option>Full Construction</option>
+                                <option>Interior Design</option>
+                                <option>Renovation</option>
+                                <option>Painting</option>
+                            </select>
+                            <select id="ratingFilter" class="px-4 py-2 border rounded-lg" onchange="filterCompanies()">
+                                <option value="">All Ratings</option>
+                                <option value="4.5">4.5+ Stars</option>
+                                <option value="4.7">4.7+ Stars</option>
+                                <option value="4.9">4.9+ Stars</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Company Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        ${displayCompanies.map(company => `
+                            <div class="bg-white rounded-xl shadow-md overflow-hidden card-hover">
+                                <img src="${company.image}" alt="${company.name}" class="w-full h-64 object-cover">
+                                <div class="p-6">
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div>
+                                            <h3 class="text-xl font-bold">${company.name}</h3>
+                                            <p class="text-gray-600 text-sm">📍 ${company.city}</p>
+                                            ${company.certified ? '<span class="inline-block bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full mt-1">✓ Certified</span>' : ''}
+                                        </div>
+                                        <div class="flex items-center bg-green-100 px-3 py-1 rounded-full">
+                                            <span class="text-yellow-500 mr-1">⭐</span>
+                                            <span class="font-semibold">${company.rating}</span>
+                                        </div>
+                                    </div>
+                                    <div class="mb-4">
+                                        <p class="text-sm text-gray-600 mb-2">📊 ${company.projects} Completed Projects</p>
+                                        <p class="text-sm text-gray-600 mb-2">🏆 ${company.experience} Experience</p>
+                                        <p class="text-sm font-semibold text-primary">${company.priceRange}</p>
+                                    </div>
+                                    <div class="mb-4">
+                                        <p class="text-xs font-semibold text-gray-700 mb-2">Services:</p>
+                                        <div class="flex flex-wrap gap-2">
+                                            ${company.services.map(s => `<span class="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded">${s}</span>`).join('')}
+                                        </div>
+                                    </div>
+                                    <div class="flex space-x-3">
+                                        <button onclick="viewCompanyProfile(${company.id})" class="flex-1 border-2 border-primary text-primary py-2 rounded-lg hover:bg-blue-50 transition">
+                                            View Portfolio
+                                        </button>
+                                        <button onclick="bookCompany(${company.id})" class="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-blue-700 transition">
+                                            Book Now
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    ${displayCompanies.length === 0 ? '<div class="text-center py-12 text-gray-500">No companies match your filters. Try adjusting your search criteria.</div>' : ''}
+                </div>
+            `;
+        }
+
+        // About Page
+        function AboutPage() {
+            return `
+                ${NavBar()}
+                <div class="max-w-7xl mx-auto px-4 py-8 fade-in">
+                    <h2 class="text-3xl font-bold mb-8">About GrihaSetu</h2>
+                    
+                    <div class="grid md:grid-cols-2 gap-8 mb-12">
+                        <div class="bg-white rounded-xl shadow-md p-8">
+                            <h3 class="text-2xl font-bold mb-4">Contact Us</h3>
+                            <div class="space-y-3">
+                                <p class="flex items-center text-gray-700"><span class="mr-3">📧</span> support@grihasetu.com</p>
+                                <p class="flex items-center text-gray-700"><span class="mr-3">📞</span> +91 98765 43210</p>
+                                <p class="flex items-center text-gray-700"><span class="mr-3">📍</span> Bangalore, Karnataka</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-md p-8">
+                            <h3 class="text-2xl font-bold mb-4">Raise a Query</h3>
+                            <form onsubmit="submitQuery(event)" class="space-y-4">
+                                <input type="text" placeholder="Your Name" class="w-full px-4 py-2 border rounded-lg" required>
+                                <input type="email" placeholder="Email" class="w-full px-4 py-2 border rounded-lg" required>
+                                <textarea placeholder="Your query..." class="w-full px-4 py-2 border rounded-lg" rows="4" required></textarea>
+                                <button type="submit" class="w-full bg-primary text-white py-2 rounded-lg hover:bg-blue-700">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Gallery -->
+                    <h3 class="text-2xl font-bold mb-6">Project Gallery</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        ${[
+                            { img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=400&fit=crop', label: 'Construction' },
+                            { img: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400&h=400&fit=crop', label: 'Interiors' },
+                            { img: 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=400&h=400&fit=crop', label: 'Renovations' },
+                            { img: 'https://images.unsplash.com/photo-1615873968403-89e068629265?w=400&h=400&fit=crop', label: 'Painting' },
+                            { img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&h=400&fit=crop', label: 'Luxury Homes' },
+                            { img: 'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=400&h=400&fit=crop', label: 'Architecture' },
+                            { img: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=400&fit=crop', label: 'Kitchen Design' },
+                            { img: 'https://images.unsplash.com/photo-1616137466211-f939a420be84?w=400&h=400&fit=crop', label: 'Living Rooms' }
+                        ].map(item => `
+                            <div class="rounded-lg overflow-hidden shadow-md card-hover cursor-pointer" onclick="openImageModal('${item.img}')">
+                                <img src="${item.img}" alt="${item.label}" class="w-full h-48 object-cover">
+                                <div class="p-2 bg-white text-center">
+                                    <p class="text-sm font-semibold">${item.label}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <!-- Image Modal -->
+                    <div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4" onclick="closeImageModal()">
+                        <img id="modalImage" src="" class="max-w-full max-h-full rounded-lg">
+                        <button class="absolute top-4 right-4 text-white text-4xl hover:text-gray-300">&times;</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Profile Page
+        function ProfilePage() {
+            return `
+                ${NavBar()}
+                <div class="max-w-7xl mx-auto px-4 py-8 fade-in">
+                    <h2 class="text-3xl font-bold mb-8">My Profile</h2>
+                    
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <!-- Personal Details -->
+                        <div class="bg-white rounded-xl shadow-md p-6">
+                            <h3 class="text-xl font-bold mb-4">Personal Details</h3>
+                            <div class="space-y-3">
+                                <p><span class="font-semibold">Name:</span> ${state.user?.name || 'John Doe'}</p>
+                                <p><span class="font-semibold">Email:</span> ${state.user?.email || 'john@example.com'}</p>
+                                <p><span class="font-semibold">Phone:</span> +91 98765 43210</p>
+                                <p><span class="font-semibold">Location:</span> Bangalore</p>
+                                <button class="mt-4 text-primary hover:underline">Edit Profile</button>
+                            </div>
+                        </div>
+
+                        <!-- Bookings -->
+                        <div class="md:col-span-2 bg-white rounded-xl shadow-md p-6">
+                            <h3 class="text-xl font-bold mb-4">My Bookings (${state.bookings.length})</h3>
+                            ${state.bookings.length === 0 ? `
+                                <div class="text-center py-12 text-gray-500">
+                                    <p class="text-4xl mb-4">📋</p>
+                                    <p>No bookings yet. Start exploring services!</p>
+                                    <button onclick="navigateTo('explore')" class="mt-4 bg-primary text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                                        Explore Services
+                                    </button>
+                                </div>
+                            ` : `
+                                <div class="space-y-4">
+                                    ${state.bookings.map((booking, idx) => `
+                                        <div class="border rounded-lg p-4 hover:shadow-md transition">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <div>
+                                                    <h4 class="font-semibold">${booking.type}</h4>
+                                                    <p class="text-sm text-gray-600">${booking.company}</p>
+                                                    <p class="text-sm text-gray-600">📍 ${booking.location}</p>
+                                                </div>
+                                                <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                                                    booking.status === 'Completed' ? 'bg-green-100 text-green-700' :
+                                                    booking.status === 'In Progress' ? 'bg-blue-100 text-blue-700' :
+                                                    'bg-yellow-100 text-yellow-700'
+                                                }">
+                                                    ${booking.status}
+                                                </span>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2 text-sm text-gray-600 mb-3">
+                                                <p>📅 Booked: ${booking.date}</p>
+                                                <p>💰 Estimate: ₹${booking.estimate?.toLocaleString('en-IN')}</p>
+                                                ${booking.area ? `<p>📏 Area: ${booking.area} sqft</p>` : ''}
+                                            </div>
+                                            <div class="flex space-x-2">
+                                                <button onclick="viewBookingDetails(${idx})" class="text-primary text-sm hover:underline">View Details →</button>
+                                                ${booking.status === 'Pending' ? `<button onclick="cancelBooking(${idx})" class="text-red-600 text-sm hover:underline">Cancel</button>` : ''}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Company Profile Page
+        function CompanyProfilePage() {
+            const company = state.selectedCompany;
+            if (!company) {
+                navigateTo('explore');
+                return '';
+            }
+            
+            return `
+                ${NavBar()}
+                <div class="max-w-7xl mx-auto px-4 py-8 fade-in">
+                    <button onclick="navigateTo('explore')" class="mb-6 text-primary hover:underline flex items-center">
+                        ← Back to Explore
+                    </button>
+                    
+                    <!-- Company Header -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+                        <div class="relative">
+                            <img src="${company.image}" alt="${company.name}" class="w-full h-96 object-cover">
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-8">
+                                <div class="flex justify-between items-end">
+                                    <div class="text-white">
+                                        <h1 class="text-4xl font-bold mb-2">${company.name}</h1>
+                                        <p class="text-lg">📍 ${company.city} • ${company.experience} Experience</p>
+                                    </div>
+                                    <div class="bg-white px-4 py-2 rounded-lg">
+                                        <div class="flex items-center">
+                                            <span class="text-yellow-500 text-2xl mr-2">⭐</span>
+                                            <span class="text-2xl font-bold">${company.rating}</span>
+                                        </div>
+                                        <p class="text-xs text-gray-600">${company.projects} projects</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-8">
+                            <div class="grid md:grid-cols-3 gap-6 mb-8">
+                                <div class="text-center p-4 bg-blue-50 rounded-lg">
+                                    <p class="text-3xl font-bold text-primary">${company.projects}</p>
+                                    <p class="text-sm text-gray-600">Completed Projects</p>
+                                </div>
+                                <div class="text-center p-4 bg-green-50 rounded-lg">
+                                    <p class="text-3xl font-bold text-green-600">${company.rating}/5</p>
+                                    <p class="text-sm text-gray-600">Average Rating</p>
+                                </div>
+                                <div class="text-center p-4 bg-orange-50 rounded-lg">
+                                    <p class="text-2xl font-bold text-orange-600">${company.priceRange}</p>
+                                    <p class="text-sm text-gray-600">Price Range</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-8">
+                                <h3 class="text-xl font-bold mb-4">Services Offered</h3>
+                                <div class="flex flex-wrap gap-3">
+                                    ${company.services.map(s => `
+                                        <span class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg font-semibold">${s}</span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            
+                            <div class="flex space-x-4">
+                                <button onclick="bookCompany(${company.id})" class="flex-1 bg-primary text-white py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition">
+                                    📅 Book This Company
+                                </button>
+                                <button class="border-2 border-primary text-primary px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition">
+                                    💬 Contact
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Portfolio Gallery -->
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <h2 class="text-2xl font-bold mb-6">Project Portfolio</h2>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            ${company.portfolio.map((img, idx) => `
+                                <div class="rounded-xl overflow-hidden shadow-md card-hover cursor-pointer" onclick="openImageModal('${img}')">
+                                    <img src="${img}" alt="Project ${idx + 1}" class="w-full h-64 object-cover">
+                                    <div class="p-4 bg-gray-50">
+                                        <p class="font-semibold">Project ${idx + 1}</p>
+                                        <p class="text-sm text-gray-600">Click to view full size</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Customer Reviews -->
+                    <div class="bg-white rounded-xl shadow-lg p-8 mt-8">
+                        <h2 class="text-2xl font-bold mb-6">Customer Reviews</h2>
+                        <div class="space-y-4">
+                            ${[
+                                { name: "Rajesh Kumar", rating: 5, review: "Excellent work! Very professional team and completed on time.", date: "Jan 2025" },
+                                { name: "Priya Sharma", rating: 5, review: "Highly recommend! Quality work within budget.", date: "Dec 2024" },
+                                { name: "Amit Patel", rating: 4, review: "Good experience overall. Minor delays but great final result.", date: "Nov 2024" }
+                            ].map(review => `
+                                <div class="border rounded-lg p-4">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <p class="font-semibold">${review.name}</p>
+                                            <p class="text-sm text-gray-600">${review.date}</p>
+                                        </div>
+                                        <div class="flex">
+                                            ${'⭐'.repeat(review.rating)}
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-700">${review.review}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Image Modal -->
+                <div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4" onclick="closeImageModal()">
+                    <img id="modalImage" src="" class="max-w-full max-h-full rounded-lg">
+                    <button class="absolute top-4 right-4 text-white text-4xl hover:text-gray-300">&times;</button>
+                </div>
+            `;
+        }
+
+        // Booking Flow
+        function BookingFlow() {
+            const type = state.currentBookingType;
+            
+            if (type === 'full' || type === 'basic') {
+                return `
+                    ${NavBar()}
+                    <div class="max-w-3xl mx-auto px-4 py-8 fade-in">
+                        <h2 class="text-3xl font-bold mb-8">${type === 'full' ? 'Full' : 'Basic'} Construction Package</h2>
+                        
+                        <div class="bg-white rounded-xl shadow-md p-8">
+                            <form onsubmit="submitBooking(event)" class="space-y-6">
+                                <div>
+                                    <label class="block font-semibold mb-2">Plot Area (sq ft)</label>
+                                    <input type="number" name="plotArea" class="w-full px-4 py-2 border rounded-lg" placeholder="e.g., 1500" required>
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-semibold mb-2">Location</label>
+                                    <input type="text" name="location" class="w-full px-4 py-2 border rounded-lg" placeholder="City, Area" required>
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-semibold mb-2">Budget Range</label>
+                                    <select name="budget" class="w-full px-4 py-2 border rounded-lg" required>
+                                        <option value="">Select budget</option>
+                                        <option>₹20-30 Lakhs</option>
+                                        <option>₹30-50 Lakhs</option>
+                                        <option>₹50-75 Lakhs</option>
+                                        <option>₹75+ Lakhs</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-semibold mb-2">Legal Documents</label>
+                                    <input type="file" class="w-full px-4 py-2 border rounded-lg">
+                                    <p class="text-xs text-gray-600 mt-1">Upload property documents (PDF)</p>
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-semibold mb-2">Extra Services</label>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center"><input type="checkbox" class="mr-2"> Interior Design</label>
+                                        <label class="flex items-center"><input type="checkbox" class="mr-2"> Landscaping</label>
+                                        <label class="flex items-center"><input type="checkbox" class="mr-2"> Solar Panels</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex space-x-4">
+                                    <button type="submit" class="flex-1 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-700">
+                                        Get Recommendations
+                                    </button>
+                                    <button type="button" onclick="navigateTo('home')" class="flex-1 border-2 border-gray-300 py-3 rounded-lg font-semibold hover:bg-gray-50">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'interior' || type === 'painting') {
+                return `
+                    ${NavBar()}
+                    <div class="max-w-3xl mx-auto px-4 py-8 fade-in">
+                        <h2 class="text-3xl font-bold mb-8">${type === 'interior' ? 'Interior Design' : 'Painting'} Service</h2>
+                        
+                        <div class="bg-white rounded-xl shadow-md p-8">
+                            <form onsubmit="submitBooking(event)" class="space-y-6">
+                                <div>
+                                    <label class="block font-semibold mb-2">House Address</label>
+                                    <input type="text" name="address" class="w-full px-4 py-2 border rounded-lg" placeholder="Full address" required>
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-semibold mb-2">House Area (sq ft)</label>
+                                    <input type="number" name="area" class="w-full px-4 py-2 border rounded-lg" placeholder="e.g., 1200" required>
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-semibold mb-2">Upload Floor Plan</label>
+                                    <input type="file" class="w-full px-4 py-2 border rounded-lg">
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-semibold mb-2">Upload Photos</label>
+                                    <input type="file" multiple class="w-full px-4 py-2 border rounded-lg">
+                                </div>
+                                
+                                <div class="flex space-x-4">
+                                    <button type="submit" class="flex-1 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-700">
+                                        Find Professionals
+                                    </button>
+                                    <button type="button" onclick="navigateTo('home')" class="flex-1 border-2 border-gray-300 py-3 rounded-lg font-semibold hover:bg-gray-50">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'renovation') {
+                return `
+                    ${NavBar()}
+                    <div class="max-w-3xl mx-auto px-4 py-8 fade-in">
+                        <h2 class="text-3xl font-bold mb-8">Renovation Service</h2>
+                        
+                        <div class="bg-white rounded-xl shadow-md p-8">
+                            <form onsubmit="submitBooking(event)" class="space-y-6">
+                                <div>
+                                    <label class="block font-semibold mb-2">Property Address</label>
+                                    <input type="text" name="address" class="w-full px-4 py-2 border rounded-lg" required>
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-semibold mb-2">Type of Renovation</label>
+                                    <select name="renovationType" class="w-full px-4 py-2 border rounded-lg" required>
+                                        <option value="">Select type</option>
+                                        <option>Kitchen Remodeling</option>
+                                        <option>Bathroom Renovation</option>
+                                        <option>Full House Renovation</option>
+                                        <option>Room Addition</option>
+                                        <option>Other</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-semibold mb-2">Detailed Description</label>
+                                    <textarea name="description" class="w-full px-4 py-2 border rounded-lg" rows="4" placeholder="Describe what you want to renovate..." required></textarea>
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-semibold mb-2">Upload Photos</label>
+                                    <input type="file" multiple class="w-full px-4 py-2 border rounded-lg">
+                                </div>
+                                
+                                <div>
+                                    <label class="block font-semibold mb-2">Additional Services</label>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center"><input type="checkbox" class="mr-2"> Painting</label>
+                                        <label class="flex items-center"><input type="checkbox" class="mr-2"> Electrical Work</label>
+                                        <label class="flex items-center"><input type="checkbox" class="mr-2"> Plumbing</label>
+                                        <label class="flex items-center"><input type="checkbox" class="mr-2"> Structural Changes</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex space-x-4">
+                                    <button type="submit" class="flex-1 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-700">
+                                        Get Quote
+                                    </button>
+                                    <button type="button" onclick="navigateTo('home')" class="flex-1 border-2 border-gray-300 py-3 rounded-lg font-semibold hover:bg-gray-50">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'estimation') {
+                return `
+                    ${NavBar()}
+                    <div class="max-w-4xl mx-auto px-4 py-8 fade-in">
+                        <h2 class="text-3xl font-bold mb-8">🤖 AI-Powered Cost Estimator</h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <!-- Input Form -->
+                            <div class="bg-white rounded-xl shadow-md p-8">
+                                <h3 class="text-xl font-bold mb-6">Project Details</h3>
+                                <form onsubmit="calculateEstimate(event)" class="space-y-6">
+                                    <div>
+                                        <label class="block font-semibold mb-2">Project Type</label>
+                                        <select name="projectType" class="w-full px-4 py-2 border rounded-lg" required>
+                                            <option value="">Select project</option>
+                                            <option value="construction">New Construction</option>
+                                            <option value="interior">Interior Design</option>
+                                            <option value="renovation">Renovation</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block font-semibold mb-2">Area (sq ft)</label>
+                                        <input type="number" id="estArea" name="area" class="w-full px-4 py-2 border rounded-lg" placeholder="e.g., 1500" min="100" required>
+                                        <p class="text-xs text-gray-500 mt-1">Enter the total carpet area</p>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block font-semibold mb-2">Location</label>
+                                        <select id="estCity" name="city" class="w-full px-4 py-2 border rounded-lg" required>
+                                            <option value="">Select city</option>
+                                            <option value="bangalore">Bangalore</option>
+                                            <option value="mumbai">Mumbai</option>
+                                            <option value="delhi">Delhi</option>
+                                            <option value="hyderabad">Hyderabad</option>
+                                            <option value="pune">Pune</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block font-semibold mb-2">Quality Level</label>
+                                        <select id="estQuality" name="quality" class="w-full px-4 py-2 border rounded-lg" required>
+                                            <option value="">Select quality</option>
+                                            <option value="basic">Basic - Budget-friendly</option>
+                                            <option value="standard">Standard - Good quality</option>
+                                            <option value="premium">Premium - High-end</option>
+                                            <option value="luxury">Luxury - Ultra premium</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-900 transition">
+                                        Calculate Estimate
+                                    </button>
+                                </form>
+                            </div>
+                            
+                            <!-- Results -->
+                            <div id="estimateResult" class="hidden">
+                                <div class="bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-xl p-8 shadow-xl">
+                                    <h3 class="text-xl font-bold mb-4">Estimated Project Cost</h3>
+                                    <div class="text-5xl font-bold mb-6" id="totalCost">₹0</div>
+                                    
+                                    <div class="bg-white/10 rounded-lg p-4 mb-6 space-y-3">
+                                        <div class="flex justify-between text-sm">
+                                            <span>Base Calculation:</span>
+                                            <span id="baseRate" class="font-semibold">-</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm">
+                                            <span>Location Factor:</span>
+                                            <span id="locationFactor" class="font-semibold">-</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm">
+                                            <span>Quality Level:</span>
+                                            <span id="qualityPremium" class="font-semibold">-</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-white/10 rounded-lg p-4 mb-6">
+                                        <h4 class="font-semibold mb-3">Cost Breakdown</h4>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex justify-between">
+                                                <span>Materials (45%)</span>
+                                                <span id="materialsCost" class="font-semibold">-</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Labor (35%)</span>
+                                                <span id="laborCost" class="font-semibold">-</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Overhead (20%)</span>
+                                                <span id="overheadCost" class="font-semibold">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-white/10 rounded-lg p-4 mb-6">
+                                        <div class="flex justify-between text-sm">
+                                            <span>Estimated Timeline:</span>
+                                            <span id="timeline" class="font-semibold">-</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="text-xs opacity-80 mb-4">*AI-generated estimate based on current market rates. Actual costs may vary by ±15% based on specific requirements.</p>
+                                    
+                                    <button onclick="navigateTo('explore')" class="w-full bg-white text-blue-600 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                                        Find Professionals →
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Info Cards -->
+                            <div class="md:col-span-2 grid md:grid-cols-3 gap-4 mt-8">
+                                <div class="bg-blue-50 rounded-lg p-4 text-center">
+                                    <div class="text-3xl mb-2">📊</div>
+                                    <p class="font-semibold text-blue-900">AI-Powered</p>
+                                    <p class="text-xs text-blue-700">Machine learning algorithms</p>
+                                </div>
+                                <div class="bg-green-50 rounded-lg p-4 text-center">
+                                    <div class="text-3xl mb-2">✓</div>
+                                    <p class="font-semibold text-green-900">95% Accurate</p>
+                                    <p class="text-xs text-green-700">Based on 5000+ projects</p>
+                                </div>
+                                <div class="bg-orange-50 rounded-lg p-4 text-center">
+                                    <div class="text-3xl mb-2">⚡</div>
+                                    <p class="font-semibold text-orange-900">Instant Results</p>
+                                    <p class="text-xs text-orange-700">Get estimate in seconds</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Event Handlers
+        function handleLogin() {
+            const email = document.getElementById('auth-email').value;
+            if (email) {
+                state.user = { email, name: email.split('@')[0] };
+                state.currentPage = 'home';
+                render();
+            }
+        }
+
+        function handleRegister() {
+            alert('Registration form would open here. For demo, using quick login.');
+            handleLogin();
+        }
+
+        function handleLogout() {
+            state.user = null;
+            state.currentPage = 'auth';
+            render();
+        }
+
+        function navigateTo(page) {
+            state.currentPage = page;
+            render();
+        }
+
+        function startBooking(type) {
+            state.currentBookingType = type;
+            state.currentPage = 'booking';
+            render();
+        }
+
+        function bookCompany(id) {
+            const company = state.companies.find(c => c.id === id);
+            state.selectedCompany = company;
+            
+            // Determine booking type based on company services
+            if (company.services.includes('Full Construction')) {
+                state.currentBookingType = 'full';
+            } else if (company.services.includes('Interior Design')) {
+                state.currentBookingType = 'interior';
+            } else if (company.services.includes('Renovation')) {
+                state.currentBookingType = 'renovation';
+            } else if (company.services.includes('Painting')) {
+                state.currentBookingType = 'painting';
+            } else {
+                state.currentBookingType = 'full';
+            }
+            
+            state.currentPage = 'booking';
+            render();
+        }
+        
+        function viewCompanyProfile(id) {
+            const company = state.companies.find(c => c.id === id);
+            state.selectedCompany = company;
+            state.currentPage = 'company-profile';
+            render();
+        }
+        
+        function openImageModal(imgSrc) {
+            document.getElementById('imageModal').classList.remove('hidden');
+            document.getElementById('modalImage').src = imgSrc;
+        }
+        
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.add('hidden');
+        }
+        
+        function filterCompanies() {
+            const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            const cityFilter = document.getElementById('cityFilter')?.value || '';
+            const serviceFilter = document.getElementById('serviceFilter')?.value || '';
+            const ratingFilter = parseFloat(document.getElementById('ratingFilter')?.value || '0');
+            
+            state.filteredCompanies = state.companies.filter(company => {
+                const matchesSearch = !searchTerm || company.name.toLowerCase().includes(searchTerm);
+                const matchesCity = !cityFilter || company.city === cityFilter;
+                const matchesService = !serviceFilter || company.services.some(s => s.includes(serviceFilter));
+                const matchesRating = !ratingFilter || company.rating >= ratingFilter;
+                
+                return matchesSearch && matchesCity && matchesService && matchesRating;
+            });
+            
+            render();
+        }
+
+        function submitBooking(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            // Calculate estimate based on booking type
+            let estimate = 0;
+            let area = 0;
+            
+            if (state.currentBookingType === 'full' || state.currentBookingType === 'basic') {
+                area = parseInt(data.plotArea);
+                const baseRate = state.currentBookingType === 'full' ? 1800 : 1400;
+                estimate = area * baseRate;
+            } else if (state.currentBookingType === 'interior' || state.currentBookingType === 'painting') {
+                area = parseInt(data.area);
+                const baseRate = state.currentBookingType === 'interior' ? 1000 : 35;
+                estimate = area * baseRate;
+            } else if (state.currentBookingType === 'renovation') {
+                // Renovation estimate based on type
+                const renovationCosts = {
+                    'Kitchen Remodeling': 250000,
+                    'Bathroom Renovation': 150000,
+                    'Full House Renovation': 800000,
+                    'Room Addition': 500000,
+                    'Other': 300000
+                };
+                estimate = renovationCosts[data.renovationType] || 300000;
+            }
+            
+            // Create booking object
+            const booking = {
+                id: Date.now(),
+                type: getBookingTypeName(state.currentBookingType),
+                company: state.selectedCompany ? state.selectedCompany.name : 'To be assigned',
+                status: 'Pending',
+                date: new Date().toLocaleDateString('en-IN'),
+                location: data.location || data.address || 'N/A',
+                area: area || null,
+                estimate: estimate,
+                details: data
+            };
+            
+            // Save booking
+            state.bookings.push(booking);
+            localStorage.setItem('grihasetu_bookings', JSON.stringify(state.bookings));
+            
+            // Show success modal
+            showSuccessModal(booking);
+        }
+        
+        function getBookingTypeName(type) {
+            const names = {
+                'full': 'Full Construction Package',
+                'basic': 'Basic Construction',
+                'interior': 'Interior Design',
+                'painting': 'Painting Service',
+                'renovation': 'Renovation',
+                'estimation': 'Cost Estimation'
+            };
+            return names[type] || 'Service';
+        }
+        
+        function showSuccessModal(booking) {
+            const modal = `
+                <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onclick="closeSuccessModal()">
+                    <div class="bg-white rounded-2xl p-8 max-w-md w-full" onclick="event.stopPropagation()">
+                        <div class="text-center">
+                            <div class="text-6xl mb-4">✅</div>
+                            <h3 class="text-2xl font-bold mb-4">Booking Confirmed!</h3>
+                            <div class="bg-blue-50 rounded-lg p-4 mb-6 text-left">
+                                <p class="text-sm mb-2"><span class="font-semibold">Service:</span> ${booking.type}</p>
+                                <p class="text-sm mb-2"><span class="font-semibold">Company:</span> ${booking.company}</p>
+                                <p class="text-sm mb-2"><span class="font-semibold">Location:</span> ${booking.location}</p>
+                                ${booking.area ? `<p class="text-sm mb-2"><span class="font-semibold">Area:</span> ${booking.area} sqft</p>` : ''}
+                                <p class="text-sm"><span class="font-semibold">Estimated Cost:</span> ₹${booking.estimate.toLocaleString('en-IN')}</p>
+                            </div>
+                            <p class="text-gray-600 mb-6">We'll contact you within 24 hours with detailed quotes from verified professionals.</p>
+                            <div class="flex space-x-3">
+                                <button onclick="navigateTo('profile')" class="flex-1 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-700">
+                                    View My Bookings
+                                </button>
+                                <button onclick="closeSuccessModal()" class="flex-1 border-2 border-gray-300 py-3 rounded-lg font-semibold hover:bg-gray-50">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modal);
+        }
+        
+        function closeSuccessModal() {
+            const modal = document.querySelector('.fixed.inset-0');
+            if (modal) modal.remove();
+        }
+        
+        function viewBookingDetails(index) {
+            const booking = state.bookings[index];
+            alert(`Booking Details:\n\nService: ${booking.type}\nCompany: ${booking.company}\nStatus: ${booking.status}\nDate: ${booking.date}\nLocation: ${booking.location}\nEstimate: ₹${booking.estimate.toLocaleString('en-IN')}`);
+        }
+        
+        function cancelBooking(index) {
+            if (confirm('Are you sure you want to cancel this booking?')) {
+                state.bookings.splice(index, 1);
+                localStorage.setItem('grihasetu_bookings', JSON.stringify(state.bookings));
+                render();
+            }
+        }
+
+        function submitQuery(e) {
+            e.preventDefault();
+            alert('Your query has been submitted. We will respond within 24 hours.');
+            e.target.reset();
+        }
+
+        function calculateEstimate(e) {
+            e.preventDefault();
+            
+            const projectType = e.target.projectType.value;
+            const area = parseInt(document.getElementById('estArea').value);
+            const city = document.getElementById('estCity').value;
+            const quality = document.getElementById('estQuality').value;
+            
+            // Base rates per sqft for different project types
+            const baseRates = {
+                construction: { basic: 1200, standard: 1600, premium: 2200, luxury: 3000 },
+                interior: { basic: 800, standard: 1100, premium: 1600, luxury: 2500 },
+                renovation: { basic: 600, standard: 900, premium: 1300, luxury: 2000 }
+            };
+            
+            // City-wise cost multipliers
+            const cityFactors = { 
+                bangalore: 1.2, 
+                mumbai: 1.4, 
+                delhi: 1.1, 
+                hyderabad: 1.0, 
+                pune: 1.15 
+            };
+            
+            const baseRate = baseRates[projectType][quality];
+            const cityFactor = cityFactors[city];
+            const baseCost = area * baseRate;
+            const locationAdjustment = baseCost * (cityFactor - 1);
+            const total = Math.round(baseCost + locationAdjustment);
+            
+            // Calculate breakdown
+            const materials = Math.round(total * 0.45);
+            const labor = Math.round(total * 0.35);
+            const overhead = Math.round(total * 0.20);
+            
+            // Timeline estimate
+            const timelineMonths = Math.ceil(area / 500);
+            
+            document.getElementById('totalCost').textContent = `₹${total.toLocaleString('en-IN')}`;
+            document.getElementById('baseRate').textContent = `₹${baseRate}/sqft × ${area} sqft = ₹${baseCost.toLocaleString('en-IN')}`;
+            document.getElementById('locationFactor').textContent = `${city.charAt(0).toUpperCase() + city.slice(1)} (+${((cityFactor - 1) * 100).toFixed(0)}%)`;
+            document.getElementById('qualityPremium').textContent = quality.charAt(0).toUpperCase() + quality.slice(1);
+            
+            // Update breakdown if elements exist
+            if (document.getElementById('materialsCost')) {
+                document.getElementById('materialsCost').textContent = `₹${materials.toLocaleString('en-IN')}`;
+                document.getElementById('laborCost').textContent = `₹${labor.toLocaleString('en-IN')}`;
+                document.getElementById('overheadCost').textContent = `₹${overhead.toLocaleString('en-IN')}`;
+                document.getElementById('timeline').textContent = `${timelineMonths}-${timelineMonths + 2} months`;
+            }
+            
+            document.getElementById('estimateResult').classList.remove('hidden');
+            
+            // Scroll to result
+            document.getElementById('estimateResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function filterCompanies(search) {
+            // In real implementation, would filter the companies array
+            console.log('Filtering:', search);
+        }
+
+        // Render function
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (!state.user) {
+                app.innerHTML = AuthPage();
+            } else {
+                switch(state.currentPage) {
+                    case 'home':
+                        app.innerHTML = HomePage();
+                        break;
+                    case 'explore':
+                        app.innerHTML = ExplorePage();
+                        break;
+                    case 'about':
+                        app.innerHTML = AboutPage();
+                        break;
+                    case 'profile':
+                        app.innerHTML = ProfilePage();
+                        break;
+                    case 'booking':
+                        app.innerHTML = BookingFlow();
+                        break;
+                    case 'company-profile':
+                        app.innerHTML = CompanyProfilePage();
+                        break;
+                    default:
+                        app.innerHTML = HomePage();
+                }
+            }
+        }
+
+        // Initialize
+        render();
+    </script>
+</body>
+</html>
